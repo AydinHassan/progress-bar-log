@@ -15,7 +15,7 @@ $ composer require trash-panda/progress-bar-log
 ## Use cases
 
 Originally I wanted this for long running import/export work. Being able to see a subset of the most recent log
-entries and also still see the progress and memory usage with scrolling the terminal. I figured it might be useful for 
+entries and also still see the progress and memory usage without scrolling the terminal. I figured it might be useful for 
 some other people too.
 
 ## Usage
