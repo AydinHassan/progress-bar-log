@@ -1,0 +1,27 @@
+{
+    "name": "trash-panda/progress-bar-log",
+    "description": "Component to display a progress bar and last X logs at the same time",
+    "keywords": ["cli", "console", "progress", "log"],
+    "homepage": "https://github.com/AydinHassan/progress-bar-log",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Aydin Hassan",
+            "email": "aydin@hotmail.co.uk"
+        }
+    ],
+    "require": {
+        "php": "^7 | ^7.1",
+        "symfony/console": "^3.2",
+        "psr/log": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    },
+    "autoload": {
+        "psr-4": { "TrashPanda\\ProgressBarLog\\": "" }
+    },
+    "scripts": {
+        "test" : "phpunit --colors=always"
+    }
+}
