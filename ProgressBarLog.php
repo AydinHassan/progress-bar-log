@@ -22,6 +22,11 @@ class ProgressBarLog
     /**
      * @var int
      */
+    private $progressBarHeight;
+
+    /**
+     * @var int
+     */
     private $numLogsToDisplay;
 
     /**
@@ -91,15 +96,22 @@ class ProgressBarLog
 
     public function start()
     {
-        $this->clear();
+        $rp = new \ReflectionProperty(ProgressBar::class, 'format');
+        $rp->setAccessible(true);
+        $this->progressBarHeight = substr_count($rp->getValue($this->getProgressBar()), "\n");
+
+        $this->clearScreen();
         $this->getProgressBar()->start();
+
+        $this->getOutput()->writeln('');
+        $this->getOutput()->writeln('');
     }
 
     public function advance()
     {
-        $this->clear();
+        $this->moveCursorToTop();
         $this->getProgressBar()->advance();
-        $this->drawLogs();
+        $this->moveToLastLine();
     }
 
     public function addLog(string $severity, string $line)
@@ -110,16 +122,12 @@ class ProgressBarLog
 
         $this->logs[] = ['severity' => $severity, 'line' => $line, 'time' => new \DateTime];
 
-        $this->clear();
-        $this->getProgressBar()->display();
+        $this->clearLogs();
         $this->drawLogs();
     }
 
     private function drawLogs()
     {
-        $this->getOutput()->writeln('');
-        $this->getOutput()->writeln('');
-
         foreach ($this->logs as $log) {
             $this->getOutput()->writeln(sprintf(
                '  <comment>%s</comment> - <bg=%s> %s </> : %s',
@@ -131,10 +139,26 @@ class ProgressBarLog
         }
     }
 
-    private function clear()
+    private function clearLogs()
     {
-        $this->getOutput()->write("\033[2J");
+        // Erase previous lines
+        if (count($this->logs) > 0) {
+            $this->getOutput()->write("\x0D");
+            $this->getOutput()->write("\x1B[2K");
+            $this->output->write(str_repeat("\x1B[1A\x1B[2K", count($this->logs) - 1));
+        }
+    }
+
+    private function clearScreen()
+    {
+        $this->getOutput()->write("\x1B[2J");
         $this->moveCursorToTop();
+    }
+
+    private function moveToLastLine()
+    {
+        $lastLine = $this->progressBarHeight + count($this->logs) + 3;
+        $this->getOutput()->write(sprintf("\x1B[%d;0H", $lastLine));
     }
 
     /**
@@ -144,6 +168,6 @@ class ProgressBarLog
      */
     private function moveCursorToTop()
     {
-        $this->getOutput()->write("\033[H");
+        $this->getOutput()->write("\x1B[H");
     }
 }
