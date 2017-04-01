@@ -96,7 +96,7 @@ class ProgressBarLog
 
     public function start()
     {
-        $rp = new \ReflectionProperty(ProgressBar::class, 'format');
+        $rp = new \ReflectionProperty(ProgressBar::class, 'internalFormat');
         $rp->setAccessible(true);
         $this->progressBarHeight = substr_count($rp->getValue($this->getProgressBar()), "\n");
 
