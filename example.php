@@ -6,6 +6,11 @@ use TrashPanda\ProgressBarLog\ProgressBarLog;
 require_once __DIR__ . '/vendor/autoload.php';
 
 $progressLog = new ProgressBarLog(6, 10);
+$progressLog->getProgressBar()->setBarCharacter('<fg=green>=</>');
+$progressLog->getProgressBar()->setProgressCharacter('<fg=green>></>');
+$progressLog->getProgressBar()->setBarWidth(100);
+$progressLog->getProgressBar()->setMessage('Starting the example...', 'title');
+$progressLog->getProgressBar()->setFormat("\n \033[44;37m %title:-37s% \033[0m\n\n %current%/%max% %bar% %percent:3s%%\n\n 🏁  %remaining% (<info>%memory%</info>)");
 $progressLog->start();
 
 sleep(1);
