@@ -116,13 +116,12 @@ class ProgressBarLog
 
     public function addLog(string $severity, string $line)
     {
+        $this->clearLogs();
         if (count($this->logs) === $this->numLogsToDisplay) {
             array_shift($this->logs);
         }
 
         $this->logs[] = ['severity' => $severity, 'line' => $line, 'time' => new \DateTime];
-
-        $this->clearLogs();
         $this->drawLogs();
     }
 
@@ -144,8 +143,7 @@ class ProgressBarLog
         // Erase previous lines
         if (count($this->logs) > 0) {
             $this->getOutput()->write("\x0D");
-            $this->getOutput()->write("\x1B[2K");
-            $this->output->write(str_repeat("\x1B[1A\x1B[2K", count($this->logs) - 1));
+            $this->output->write(str_repeat("\x1B[1A\x1B[2K", count($this->logs)));
         }
     }
 
