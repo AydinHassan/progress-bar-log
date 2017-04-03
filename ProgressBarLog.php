@@ -122,6 +122,13 @@ class ProgressBarLog
         $this->moveToLastLine();
     }
 
+    public function finish()
+    {
+        $this->moveCursorToTop();
+        $this->getProgressBar()->finish();
+        $this->moveToLastLine();
+    }
+
     public function addLog(string $severity, string $line)
     {
         $this->clearLogs();
