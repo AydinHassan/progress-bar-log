@@ -96,9 +96,17 @@ class ProgressBarLog
 
     public function start()
     {
-        $rp = new \ReflectionProperty(ProgressBar::class, 'internalFormat');
-        $rp->setAccessible(true);
-        $this->progressBarHeight = substr_count($rp->getValue($this->getProgressBar()), "\n");
+        $r  = new \ReflectionObject($this->progressBar);
+
+        if ($r->hasProperty('internalFormat')) {
+            $rp = $r->getProperty('internalFormat');
+            $rp->setAccessible(true);
+            $this->progressBarHeight = substr_count($rp->getValue($this->getProgressBar()), "\n");
+        } elseif ($r->hasProperty('formatLineCount')) {
+            $rp = $r->getProperty('formatLineCount');
+            $rp->setAccessible(true);
+            $this->progressBarHeight = $rp->getValue($this->getProgressBar());
+        }
 
         $this->clearScreen();
         $this->getProgressBar()->start();
@@ -129,13 +137,24 @@ class ProgressBarLog
     {
         foreach ($this->logs as $log) {
             $this->getOutput()->writeln(sprintf(
-               '  <comment>%s</comment> - <bg=%s> %s </> : %s',
+               '  <comment>%s</comment> - %s : %s',
                $log['time']->format('H:i:s'),
-               static::$severityColourMap[$log['severity']] ?? 'green',
-               str_pad(strtoupper($log['severity']), static::$severityPad, ' ', STR_PAD_LEFT),
+               $this->colourSeverity($log),
                $log['line']
            ));
         }
+    }
+
+    private function colourSeverity(array $log)
+    {
+        $colour   = static::$severityColourMap[$log['severity']] ?? 'green';
+        $severity = str_pad(strtoupper($log['severity']), static::$severityPad, ' ', STR_PAD_LEFT);
+
+        if ($colour === 'default') {
+            return sprintf(' %s ', $severity);
+        }
+
+        return sprintf('<bg=%s> %s </>', $colour, $severity);
     }
 
     private function clearLogs()
