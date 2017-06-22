@@ -96,7 +96,7 @@ class ProgressBarLog
 
     public function start()
     {
-        $r  = new \ReflectionObject($this->progressBar);
+        $r  = new \ReflectionObject($this->getProgressBar());
 
         if ($r->hasProperty('internalFormat')) {
             $rp = $r->getProperty('internalFormat');
