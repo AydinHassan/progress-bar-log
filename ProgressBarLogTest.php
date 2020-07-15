@@ -167,9 +167,129 @@ class ProgressBarLogTest extends TestCase
 
     }
 
-
     private function getExpectedRegex(array $output)
     {
         return '/' . implode('', $output) . '/';
+    }
+
+    public function testGetTotalLogCount(): void
+    {
+        $progressBarLog = new ProgressBarLog(5, 5);
+        $progressBarLog->setOutput($output = new BufferedOutput);
+        $progressBarLog->getProgressBar()->setFormat(" %current%/%max% [%bar%] %percent:3s%% Total logs: %total_log_count%\n");
+        $progressBarLog->getProgressBar()->setBarWidth(5);
+        $progressBarLog->start();
+
+        self::assertRegExp(
+            $this->getExpectedRegex(['0\/5 \[>----\]   0% Total logs: 0']),
+            $output->fetch()
+        );
+
+        $progressBarLog->addLog(LogLevel::EMERGENCY, 'Message 1');
+
+        self::assertRegExp(
+            $this->getExpectedRegex([
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 1"
+            ]),
+            $output->fetch()
+        );
+
+        $progressBarLog->advance();
+
+        self::assertRegExp(
+            $this->getExpectedRegex([
+                "1\/5 \[=>---\]  20% Total logs: 1",
+            ]),
+            $output->fetch()
+        );
+
+        $progressBarLog->addLog(LogLevel::EMERGENCY, 'Message 2');
+
+        self::assertRegExp(
+            $this->getExpectedRegex([
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 1\n",
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 2\n",
+            ]),
+            $output->fetch()
+        );
+
+        $progressBarLog->advance();
+
+        self::assertRegExp(
+            $this->getExpectedRegex([
+                "2\/5 \[==>--\]  40% Total logs: 2",
+            ]),
+            $output->fetch()
+        );
+
+        $progressBarLog->addLog(LogLevel::EMERGENCY, 'Message 3');
+
+        self::assertRegExp(
+            $this->getExpectedRegex([
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 1\n",
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 2\n",
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 3\n",
+            ]),
+            $output->fetch()
+        );
+
+        $progressBarLog->getProgressBar()->display();
+
+        self::assertRegExp(
+            $this->getExpectedRegex([
+                "2\/5 \[==>--\]  40% Total logs: 3",
+            ]),
+            $output->fetch()
+        );
+
+        $progressBarLog->addLog(LogLevel::EMERGENCY, 'Message 4');
+
+        self::assertRegExp(
+            $this->getExpectedRegex([
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 1\n",
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 2\n",
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 3\n",
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 4\n",
+            ]),
+            $output->fetch()
+        );
+
+        $progressBarLog->getProgressBar()->display();
+
+        self::assertRegExp(
+            $this->getExpectedRegex([
+                "2\/5 \[==>--\]  40% Total logs: 4",
+            ]),
+            $output->fetch()
+        );
+
+        self::assertEquals(4, $progressBarLog->getTotalLogCount());
+
+        $progressBarLog->addLog(LogLevel::EMERGENCY, 'Message 5');
+        $progressBarLog->addLog(LogLevel::EMERGENCY, 'Message 6');
+        $progressBarLog->addLog(LogLevel::EMERGENCY, 'Message 7');
+        $progressBarLog->addLog(LogLevel::EMERGENCY, 'Message 8');
+
+        self::assertEquals(8, $progressBarLog->getTotalLogCount());
+
+        self::assertRegExp(
+            $this->getExpectedRegex([
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 4\n",
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 5\n",
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 6\n",
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 7\n",
+                "  \d{2}:\d{2}:\d{2} -  EMERGENCY  : Message 8\n",
+            ]),
+            $output->fetch()
+        );
+
+        $progressBarLog->getProgressBar()->display();
+
+        self::assertRegExp(
+            $this->getExpectedRegex([
+                "2\/5 \[==>--\]  40% Total logs: 8",
+            ]),
+            $output->fetch()
+        );
     }
 }
