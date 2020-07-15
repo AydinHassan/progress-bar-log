@@ -40,6 +40,11 @@ class ProgressBarLog
     private $logs = [];
 
     /**
+     * @var int
+     */
+    private $totalLogCount = 0;
+
+    /**
      * @var array
      */
     private static $severityColourMap = [
@@ -81,6 +86,12 @@ class ProgressBarLog
     public function getProgressBar() : ProgressBar
     {
         if (!$this->progressBar) {
+            ProgressBar::setPlaceholderFormatterDefinition(
+                'total_log_count',
+                function (ProgressBar $progressBar, OutputInterface $output) {
+                    return $this->getTotalLogCount();
+                }
+            );
             $this->progressBar = new ProgressBar($this->getOutput(), $this->numRecords);
             $this->progressBar->setFormat('debug');
             $this->progressBar->setBarWidth((int) exec('tput cols'));
@@ -131,6 +142,7 @@ class ProgressBarLog
 
     public function addLog(string $severity, string $line)
     {
+        $this->totalLogCount++;
         $this->clearLogs();
         if (count($this->logs) === $this->numLogsToDisplay) {
             array_shift($this->logs);
@@ -193,5 +205,10 @@ class ProgressBarLog
     private function moveCursorToTop()
     {
         $this->getOutput()->write("\x1B[H");
+    }
+
+    public function getTotalLogCount(): int
+    {
+        return $this->totalLogCount;
     }
 }
